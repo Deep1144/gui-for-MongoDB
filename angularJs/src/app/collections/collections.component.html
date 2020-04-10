@@ -1,0 +1,375 @@
+<nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0">
+  <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">KMSOFT</a>
+  <!-- <input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search"> -->
+  <p class="my-auto" style="color: white;">DashBoard</p>
+  <ul class="navbar-nav px-3">
+    <!-- <li class="nav-item text-nowrap">
+          <a class="nav-link" href="#">Sign out</a>
+        </li> -->
+  </ul>
+</nav>
+
+
+<div class="container-fluid">
+  <div class="row">
+    <nav class="col-md-3 d-none d-md-block bg-light sidebar mt-0">
+      <div class="sidebar-sticky">
+        <mat-card class="">
+          <mat-list>
+            <mat-list-item *ngFor="let dbName of collectionService.dataBaseNames">
+              <button mat-icon-button (click)="getCollection(dbName)">
+                <mat-icon  mat-list-icon>keyboard_arrow_down</mat-icon>
+              </button>
+              <button mat-icon-button (click)="BackupDatabase(dbName)">
+                <mat-icon color="primary" mat-list-icon>backup</mat-icon>
+              </button>
+              <button mat-icon-button color="warn" (click)="DeleteDb(dbName)">
+                <mat-icon  mat-list-icon>delete</mat-icon>
+              </button>
+
+              <h4 mat-line>{{ dbName.name }}</h4>
+            </mat-list-item>
+          </mat-list>
+        </mat-card>
+
+        <mat-card *ngIf="collectionService.collectionFlag === 1">
+          <h3>List of Collections</h3>
+          <mat-list>
+            <mat-list-item *ngFor="let CollectionName of collectionService.collectionNames">
+              <button mat-icon-button (click)="getData(CollectionName)">
+                <mat-icon mat-list-icon>keyboard_arrow_down</mat-icon>
+              </button>
+              <button mat-icon-button (click)="DeleteCollection(CollectionName)">
+                <mat-icon color="warn" mat-list-icon>delete</mat-icon>
+              </button>
+              <h4 mat-line>{{ CollectionName.name }}</h4>
+            </mat-list-item>
+          </mat-list>
+        </mat-card>
+      </div>
+    </nav>
+
+    <main role="main" class="col-md-9 ml-sm-auto col-lg-9 pt-3 px-4">
+
+      <div>
+        <!-- <div class="album py-5 container" > -->
+        <div class="album py-5 container" *ngIf="collectionService.dataListFlag === 1">
+
+          <nav class="navbar navbar-light flex-md-nowrap p-0">
+            <a class="navbar-light">Search</a>
+            <!-- <button (click)="ExportCollection()">Export csv</button> -->
+
+
+            <input type='file' (change)="fileChanged($event)">
+
+
+            <form class="form-inline">
+              <button mat-button (click)="ExportCollectionJson()" color="primary">Export json</button>
+              <button mat-button (click)="ExportCollection()" color="primary">Export csv</button>
+              <mat-form-field>
+                <mat-label>Select Item to search</mat-label>
+                <mat-select>
+                  <mat-option *ngFor="let composant of arrres" [value]="composant"
+                    (click)="checkfordateformat(composant)">
+
+                    {{ composant }}
+
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </form>
+          </nav>
+
+
+
+          <div align="center" *ngIf="this.Datatypeofselectedoption === 'date'" class="my-2 w-75 mx-auto">
+            <form #dateSearchForm="ngForm" (ngSubmit)="searchDate(dateSearchForm)">
+              <mat-form-field class="mx-3">
+                <mat-label>Choose start date</mat-label>
+                <input matInput name="date1" [matDatepicker]="picker" #datetosearch1="ngModel"
+                  [(ngModel)]="this.collectionService.dateToSearch1" />
+                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-datepicker #picker></mat-datepicker>
+              </mat-form-field>
+              <mat-form-field>
+                <mat-label>Choose last date</mat-label>
+                <input matInput name="date2" [matDatepicker]="picker2" #datetosearch2="ngModel"
+                  [(ngModel)]="this.collectionService.dateToSearch2" />
+                <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
+                <mat-datepicker #picker2></mat-datepicker>
+              </mat-form-field>
+              <button mat-button color="primary">Search</button>
+            </form>
+          </div>
+
+
+
+
+          <div align="center" *ngIf="this.Datatypeofselectedoption === 'object'" class="my-2 w-75 mx-auto">
+            <form #objectSearchForm="ngForm" (ngSubmit)="searchObject(objectSearchForm)">
+              <mat-form-field>
+                <mat-label>Choose a object</mat-label>
+                <input matInput name="objecttosearch" #objecttosearch="ngModel"
+                  [(ngModel)]="this.collectionService.objecttosearch" />
+              </mat-form-field>
+              <button type="submit" mat-button color="primary">Search</button>
+            </form>
+          </div>
+
+
+
+
+
+
+
+
+          <div align="center" *ngIf="this.Datatypeofselectedoption === 'number'" class="my-2 w-75 mx-auto">
+            <form class="example-form" #numberSearchForm="ngForm" (ngSubmit)="searchNumber(numberSearchForm)">
+              <mat-form-field class="example-full-width mx-3">
+                <mat-label>Enter starting number</mat-label>
+                <input matInput type="number" name="number1" #numbertosearch1="ngModel"
+                  [(ngModel)]="this.collectionService.numbertosearch1" />
+              </mat-form-field>
+
+              <mat-form-field class="example-full-width">
+                <mat-label>Enter Ending number</mat-label>
+                <input matInput type="number" name="number2" #numbertosearch2="ngModel"
+                  [(ngModel)]="this.collectionService.numbertosearch2" />
+              </mat-form-field>
+              <button mat-button color="primary">Search</button>
+            </form>
+          </div>
+
+          <div align="center" *ngIf="this.Datatypeofselectedoption === 'string'" class="my-2 w-75 mx-auto">
+            <form #stringsSearchForm="ngForm" (ngSubmit)="searchString(stringsSearchForm)">
+              <mat-form-field>
+                <mat-label>Choose a string</mat-label>
+                <input matInput name="stringToSearch" #stringtosearch="ngModel"
+                  [(ngModel)]="this.collectionService.stringtosearch" />
+              </mat-form-field>
+              <button type="submit" mat-button color="primary">Search</button>
+            </form>
+          </div>
+
+
+
+          <h3 class="my-3">All DataList</h3>
+          <div>
+            <table id="dataTable" class="table table-hover">
+
+              <thead>
+                <tr>
+                  <th scope="col" *ngFor="let composant of arrres">{{ composant }}</th>
+                  <th>Buttons</th>
+                </tr>
+              </thead>
+
+              <tbody id="table">
+                <ng-container *ngFor="let row of collectionService.dataList">
+                  <tr *ngIf="isExpanded!= this.row['_id']">
+                    <td *ngFor="let composant of arrres">
+
+                      <input matInput name="{{ composant }}" *ngIf="!checkIfObjectType(this.row[composant])"
+                        [(ngModel)]="this.row[composant]" />
+
+                      <mat-chip-list *ngIf="checkIfObjectType(this.row[composant])" aria-label="Fish selection">
+                        <p class="mt-1">
+                          <span matBadge="1" matBadgeOverlap="false"
+                            (click)="ExpandObject(this.row,this.row[composant],this.row['_id'] )">Object</span>
+                        </p>
+
+                      </mat-chip-list>
+
+                    </td>
+                    <td>
+                      <div class="d-flex justify-content-between align-items-center">
+                        <div class="btn-group">
+                          <button mat-button (click)="onUpdateSubmit(row)">
+                            <mat-icon>update</mat-icon>
+                          </button>
+                          <button mat-button (click)="onDelete(row)">
+                            <mat-icon>delete_forever</mat-icon>
+                          </button>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+
+
+                  <ng-container *ngIf="isExpanded== this.row['_id']">
+                    <tr>
+                      <td *ngFor="let composant of arrres">
+                        <input matInput name="{{ composant }}" *ngIf="!checkIfObjectType(this.row[composant])"
+                          [(ngModel)]="this.row[composant]" />
+                        <mat-chip-list *ngIf="checkIfObjectType(this.row[composant])" aria-label="Fish selection">
+                          <p class="mt-1">
+                            <span matBadge="1" matBadgeOverlap="false"
+                              (click)="ExpandObject(this.row,this.row[composant],this.row['_id'] )">Object</span>
+                          </p>
+                          <!-- <mat-chip color="accent" selected (click)="ExpandObject(this.row,this.row[composant],this.row['_id'] )">Object</mat-chip> -->
+                        </mat-chip-list>
+                      </td>
+                      <td>
+                        <div class="d-flex justify-content-between align-items-center">
+                          <div class="btn-group">
+                            <button mat-button (click)="onUpdateSubmit(row)">
+                              <mat-icon>update</mat-icon>
+                            </button>
+                            <button mat-button (click)="onDelete(row)">
+                              <mat-icon>delete_forever</mat-icon>
+                            </button>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr *ngFor="let object of keysOfExpanded">
+                      <td>{{object}}</td>
+                      <td>
+                        <input matInput name="{{ object }}" *ngIf="!checkIfObjectType(ObjectExpanded[object])"
+                          [(ngModel)]="ObjectExpanded[object]" />
+                        <mat-chip-list *ngIf="checkIfObjectType(ObjectExpanded[object])" aria-label="Fish selection">
+                          <p class="mt-1">
+                            <span matBadge="1" matBadgeOverlap="false"
+                              (click)="ExpandObject(this.row,ObjectExpanded[object],this.row['_id'])">Object</span>
+                          </p>
+                          <!-- <mat-chip color="accent" selected (click)="ExpandObject(this.row,ObjectExpanded[object],this.row['_id'] )">Object</mat-chip> -->
+                        </mat-chip-list>
+                      </td>
+                    </tr>
+                  </ng-container>
+
+                </ng-container>
+              </tbody>
+
+              <nav aria-label="Page navigation example">
+                <ul class="pagination">
+                  <li class="page-item" (click)="min=defaultmin; max=defaultmax; idOfItemToExpand=''; getData(collectionnameforreuse)"><a class="page-link" href="#">first</a></li>
+                  <li class="page-item" (click)="pastcount(); idOfItemToExpand=''"><a class="page-link" href="#">previous</a></li>
+                  <li class="page-item" (click)="min=min+defaultmax ; max=max+defaultmax ;idOfItemToExpand=''; getData(collectionnameforreuse)"><a class="page-link" href="#">next</a></li>
+                </ul>
+              </nav>
+            </table>
+
+          </div>
+
+        </div>
+
+
+        <div *ngIf="this.collectionService.resultOfSearchString">
+          <h3>Search Result</h3>
+
+          <table class="table table-hover mt-2">
+            <thead>
+              <tr>
+                <th scope="col" *ngFor="let composant of arrres">{{ composant }}</th>
+                <th>Buttons</th>
+              </tr>
+            </thead>
+            <tbody id="table">
+              <ng-container *ngFor="let row of collectionService.resultOfSearchString">
+                <tr *ngIf="isExpanded!= this.row['_id']">
+                  <td *ngFor="let composant of arrres">
+
+                    <input matInput name="{{ composant }}" *ngIf="!checkIfObjectType(this.row[composant])"
+                      [(ngModel)]="this.row[composant]" />
+
+                    <mat-chip-list *ngIf="checkIfObjectType(this.row[composant])" aria-label="Fish selection">
+                      <p class="mt-1">
+                        <span matBadge="1" matBadgeOverlap="false"
+                          (click)="ExpandObject(this.row,this.row[composant],this.row['_id'] )">Object</span>
+                      </p>
+
+                      <!-- <mat-chip color="accent" selected (click)="ExpandObject(this.row,this.row[composant],this.row['_id'] )">Object</mat-chip> -->
+                    </mat-chip-list>
+
+                  </td>
+                  <td>
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div class="btn-group">
+                        <button mat-button (click)="onUpdateSubmit(row)">
+                          <mat-icon>update</mat-icon>
+                        </button>
+                        <button mat-button (click)="onDelete(row)">
+                          <mat-icon>delete_forever</mat-icon>
+                        </button>
+
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+
+                <ng-container *ngIf="isExpanded== this.row['_id']">
+                  <tr>
+                    <td *ngFor="let composant of arrres">
+
+                      <input matInput name="{{ composant }}" *ngIf="!checkIfObjectType(this.row[composant])"
+                        [(ngModel)]="this.row[composant]" />
+
+                      <mat-chip-list *ngIf="checkIfObjectType(this.row[composant])" aria-label="Fish selection">
+                        <p class="mt-1">
+                          <span matBadge="1" matBadgeOverlap="false"
+                            (click)="ExpandObject(this.row,ObjectExpanded[composant],this.row['_id'] )">Object</span>
+                        </p>
+                        <!-- <mat-chip color="accent" selected (click)="ExpandObject(this.row,this.row[composant],this.row['_id'] )">Object</mat-chip> -->
+                      </mat-chip-list>
+
+                    </td>
+                    <td>
+                      <div class="d-flex justify-content-between align-items-center">
+                        <div class="btn-group">
+                          <button mat-button (click)="onUpdateSubmit(row)">
+                            <mat-icon>update</mat-icon>
+                          </button>
+                          <button mat-button (click)="onDelete(row)">
+                            <mat-icon>delete_forever</mat-icon>
+                          </button>
+
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+
+                  <tr *ngFor="let object of keysOfExpanded">
+                    <td>{{object}}</td>
+                    <td>
+                      <input matInput name="{{ object }}" *ngIf="!checkIfObjectType(ObjectExpanded[object])"
+                        [(ngModel)]="ObjectExpanded[object]" />
+
+                      <mat-chip-list *ngIf="checkIfObjectType(ObjectExpanded[object])" aria-label="Fish selection">
+                        <p class="mt-1">
+                          <span matBadge="1" matBadgeOverlap="false"
+                            (click)="ExpandObject(this.row,ObjectExpanded[object],this.row['_id'] )">Object</span>
+                        </p>
+
+                        <!-- <mat-chip color="accent" selected (click)="ExpandObject(this.row,ObjectExpanded[object],this.row['_id'] )">Object</mat-chip> -->
+                      </mat-chip-list>
+
+                    </td>
+                  </tr>
+                </ng-container>
+
+              </ng-container>
+            </tbody>
+          </table>
+
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+
+
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+  integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
+<script src="../../assets/js/vendor/popper.min.js"></script>
+<script src="../../dist/js/bootstrap.min.js"></script>
+<script src="jquery.easyPaginate.js"></script>
+<script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
+<script>
+  feather.replace()
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
